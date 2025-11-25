@@ -32,8 +32,8 @@ This project directly implements the following:
    *   **Username**: `admin`
    *   **Password**: `admin`
 
-### Cloud Deployment (Render)
-This project is configured for **Infrastructure as Code** deployment on Render.
+### Cloud Deployment (Optional)
+This project is configured for **Infrastructure as Code** deployment on Render. You can deploy it if you wish, or just run it locally.
 
 1.  **Push to GitHub**:
     Create a new repository on GitHub and push this code:
