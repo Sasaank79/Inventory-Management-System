@@ -2,78 +2,63 @@
 
 A production-ready, 3-tier Inventory Management System built with Python (Flask), MySQL, and Bootstrap. Designed to demonstrate strict 3NF database design, raw SQL analytics, and secure JWT authentication.
 
-## Tech Stack
-- **Backend**: Python 3, Flask, SQLAlchemy
-- **Database**: MySQL (Strict 3NF Schema)
-- **Auth**: JWT (JSON Web Tokens)
-- **Frontend**: HTML5, Bootstrap 5, Vanilla JS
-- **Deployment**: Render / Railway
-
-## Features
-- **3NF Normalized Schema**: Optimized for data integrity with foreign keys and indexes.
-- **Bulk Seeding**: Script to generate 500+ realistic products and transactions.
-- **Inventory Tracking**: Real-time stock calculation based on IN/OUT transactions.
-- **Analytics Dashboard**: Top-selling items, low stock alerts, and total inventory value using **Raw ANSI SQL**.
-- **Secure API**: All write endpoints protected via JWT.
+## Resume Match
+This project directly implements the following:
+- **Tech Stack**: Python, Flask, MySQL, JWT, SQLAlchemy, Bootstrap, Render.
+- **Database**: Strict 3NF schema (`schema.sql`) with foreign keys and indexes.
+- **Backend**: REST API with JWT auth (`app/auth.py`, `app/routes/`).
+- **Analytics**: Raw ANSI SQL queries for top-selling/low-stock (`app/routes/analytics.py`).
+- **Deployment**: Configured for Render with managed MySQL (`render.yaml`).
 
 ## Setup & Installation
 
 ### Local Development
-1. **Clone the repository**:
-   ```bash
-   git clone <repo-url>
-   cd inventory-system
-   ```
-
-2. **Create a virtual environment**:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install dependencies**:
+1. **Install dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **Configure Database**:
-   - Create a MySQL database (or use SQLite default for testing).
-   - Copy `.env.example` to `.env` (if applicable) or set env vars:
-     ```bash
-     export DATABASE_URL="mysql+pymysql://user:pass@localhost/db_name"
-     export JWT_SECRET="your-secret"
-     ```
-
-5. **Seed the Database**:
+2. **Seed the Database**:
    ```bash
    python seed_db.py
    ```
-   *This will create tables and insert 500+ products and an admin user (admin/admin).*
+   *Creates a local SQLite DB `instance/inventory.db` with 500+ items.*
 
-6. **Run the Application**:
+3. **Run the Application**:
    ```bash
    python run.py
    ```
    Visit `http://localhost:5000`.
+   *   **Username**: `admin`
+   *   **Password**: `admin`
 
-### Deployment (Render)
-1. Connect your GitHub repo to Render.
-2. Create a **Web Service** using the `render.yaml` blueprint or manually:
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `gunicorn run:app`
-3. Add a **MySQL Database** service and link it via `DATABASE_URL`.
-4. **Seeding on Cloud**:
-   - Use the Render Shell (or SSH) to run: `python seed_db.py`
+### Cloud Deployment (Render)
+This project is configured for **Infrastructure as Code** deployment on Render.
+
+1.  **Push to GitHub**:
+    Create a new repository on GitHub and push this code:
+    ```bash
+    git remote add origin https://github.com/YOUR_USERNAME/inventory-system.git
+    git push -u origin main
+    ```
+
+2.  **Deploy on Render**:
+    *   Go to [dashboard.render.com](https://dashboard.render.com).
+    *   Click **New +** -> **Blueprint**.
+    *   Connect your GitHub repository.
+    *   Render will automatically detect `render.yaml` and create:
+        *   **Web Service**: The Flask App.
+        *   **Database**: A managed MySQL instance.
+    *   Click **Apply**.
+
+3.  **Seed the Live Database**:
+    Once deployed, the database will be empty. To seed it:
+    *   Go to the **Web Service** in Render Dashboard.
+    *   Click **Shell** (SSH).
+    *   Run: `python seed_db.py`
 
 ## API Endpoints
 - `POST /auth/login`: Get JWT token.
 - `GET /api/products`: List all products.
 - `POST /api/transactions`: Record stock movement.
 - `GET /api/analytics/top-selling`: Raw SQL analytics.
-
-## Database Schema
-See `schema.sql` for the full DDL.
-- `users`: Auth credentials.
-- `suppliers`: Vendor info.
-- `products`: Catalog items (linked to suppliers).
-- `inventory_transactions`: Ledger of all stock changes (linked to products).
