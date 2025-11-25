@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mt-4 mb-3">Analytics</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">Top Selling Products</div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Total Sold</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topSellingTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">Low Stock Alert (< 20)</div>
+                    <div class="card-body">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th>Current Stock</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lowStockTable"></tbody>
+                        </table>
+                    </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+
+    {% block scripts %}
+    <script>
+        async function loadAnalytics() {
+            const topRes = await apiCall('/api/analytics/top-selling');
+            if (topRes.ok) {
+                const data = await topRes.json();
+                document.getElementById('topSellingTable').innerHTML = data.map(i => `
+            <tr><td>${i.name}</td><td>${i.total_sold}</td></tr>
+        `).join('');
+            }
+
+            const lowRes = await apiCall('/api/analytics/low-stock');
+            if (lowRes.ok) {
+                const data = await lowRes.json();
+                document.getElementById('lowStockTable').innerHTML = data.map(i => `
+            <tr><td>${i.name}</td><td>${i.sku}</td><td class="text-danger fw-bold">${i.stock}</td></tr>
+        `).join('');
+            }
+        }
+
+        loadAnalytics();
+    </script>
+    {% endblock %}

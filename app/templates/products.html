@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+    <h2>Products</h2>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">Add Product</button>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>SKU</th>
+                    <th>Category</th>
+                    <th>Supplier</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                </tr>
+            </thead>
+            <tbody id="productsTable">
+                <!-- Populated by JS -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProductForm">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">SKU</label>
+                        <input type="text" class="form-control" name="sku" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Category</label>
+                        <input type="text" class="form-control" name="category" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Supplier</label>
+                        <select class="form-select" name="supplier_id" id="supplierSelect" required>
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Unit Price</label>
+                        <input type="number" step="0.01" class="form-control" name="unit_price" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Initial Stock</label>
+                        <input type="number" class="form-control" name="initial_stock" value="0">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Product</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function loadProducts() {
+        const res = await apiCall('/api/products');
+        if (res.ok) {
+            const products = await res.json();
+            const tbody = document.getElementById('productsTable');
+            tbody.innerHTML = products.map(p => `
+            <tr>
+                <td>${p.id}</td>
+                <td>${p.name}</td>
+                <td>${p.sku}</td>
+                <td>${p.category}</td>
+                <td>${p.supplier}</td>
+                <td>$${p.unit_price.toFixed(2)}</td>
+                <td>${p.stock}</td>
+            </tr>
+        `).join('');
+        }
+    }
+
+    async function loadSuppliers() {
+        const res = await apiCall('/api/suppliers');
+        if (res.ok) {
+            const suppliers = await res.json();
+            const select = document.getElementById('supplierSelect');
+            select.innerHTML = suppliers.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+        }
+    }
+
+    document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+
+        const res = await apiCall('/api/products', 'POST', data);
+        if (res.ok) {
+            bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+            e.target.reset();
+            loadProducts();
+        } else {
+            alert('Error creating product');
+        }
+    });
+
+    loadProducts();
+    loadSuppliers();
+</script>
+{% endblock %}
