@@ -62,3 +62,10 @@ This project is configured for **Infrastructure as Code** deployment on Render. 
 - `GET /api/products`: List all products.
 - `POST /api/transactions`: Record stock movement.
 - `GET /api/analytics/top-selling`: Raw SQL analytics.
+
+## Gallery
+*(Add your screenshots here)*
+- **Dashboard**: Overview of stock and value.
+- **Products**: Searchable list with pagination.
+- **Analytics**: Top selling items report.
+

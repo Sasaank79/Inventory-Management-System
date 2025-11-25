@@ -8,11 +8,21 @@ products_bp = Blueprint('products', __name__)
 @products_bp.route('/api/products', methods=['GET'])
 @token_required
 def get_products(current_user):
-    products = Product.query.all()
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 20, type=int)
+    search = request.args.get('q', '', type=str)
+    
+    query = Product.query
+    if search:
+        query = query.filter(Product.name.ilike(f'%{search}%') | Product.sku.ilike(f'%{search}%'))
+        
+    pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+    products = pagination.items
+    
     output = []
     for product in products:
         # Calculate current stock
-        # In a real app with huge data, we might cache this or use a trigger/view
+        # Optimization: In a real app, this should be a joined query or cached field
         stock_in = db.session.query(db.func.sum(InventoryTransaction.quantity))\
             .filter_by(product_id=product.id, transaction_type='IN').scalar() or 0
         stock_out = db.session.query(db.func.sum(InventoryTransaction.quantity))\
@@ -28,7 +38,13 @@ def get_products(current_user):
             'unit_price': float(product.unit_price),
             'stock': current_stock
         })
-    return jsonify(output), 200
+        
+    return jsonify({
+        'products': output,
+        'total': pagination.total,
+        'pages': pagination.pages,
+        'current_page': page
+    }), 200
 
 @products_bp.route('/api/products/<int:id>', methods=['GET'])
 @token_required
