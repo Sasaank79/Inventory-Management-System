@@ -54,8 +54,9 @@
         ]);
 
         if (productsRes && productsRes.ok) {
-            const products = await productsRes.json();
-            document.getElementById('totalProducts').textContent = products.length;
+            const data = await productsRes.json();
+            // API now returns { products: [], total: ... }
+            document.getElementById('totalProducts').textContent = data.total;
         }
 
         if (lowStockRes && lowStockRes.ok) {

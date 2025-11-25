@@ -81,11 +81,12 @@
     }
 
     async function loadProducts() {
-        const res = await apiCall('/api/products');
+        // Fetch a large number to populate dropdown (simple fix for now)
+        const res = await apiCall('/api/products?per_page=1000');
         if (res.ok) {
-            const products = await res.json();
+            const data = await res.json();
             const select = document.getElementById('productSelect');
-            select.innerHTML = products.map(p => `<option value="${p.id}">${p.name} (Stock: ${p.stock})</option>`).join('');
+            select.innerHTML = data.products.map(p => `<option value="${p.id}">${p.name} (Stock: ${p.stock})</option>`).join('');
         }
     }
 

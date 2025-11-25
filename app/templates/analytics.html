@@ -39,6 +39,27 @@
             </div>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header">Recently Added Products</div>
+                <div class="card-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>SKU</th>
+                                <th>Price</th>
+                                <th>Supplier</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentProductsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
     {% endblock %}
 
     {% block scripts %}
@@ -57,6 +78,19 @@
                 const data = await lowRes.json();
                 document.getElementById('lowStockTable').innerHTML = data.map(i => `
             <tr><td>${i.name}</td><td>${i.sku}</td><td class="text-danger fw-bold">${i.stock}</td></tr>
+        `).join('');
+            }
+
+            const recentRes = await apiCall('/api/analytics/recent-products');
+            if (recentRes.ok) {
+                const data = await recentRes.json();
+                document.getElementById('recentProductsTable').innerHTML = data.map(i => `
+            <tr>
+                <td>${i.name}</td>
+                <td>${i.sku}</td>
+                <td>$${i.price.toFixed(2)}</td>
+                <td>${i.supplier}</td>
+            </tr>
         `).join('');
             }
         }

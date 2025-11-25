@@ -69,3 +69,18 @@ def stock_value(current_user):
     result = db.session.execute(sql)
     total_value = result.scalar() or 0
     return jsonify({'total_stock_value': float(total_value)}), 200
+@analytics_bp.route('/api/analytics/recent-products', methods=['GET'])
+@token_required
+def recent_products(current_user):
+    # Get 5 most recently added products
+    sql = text("""
+        SELECT p.name, p.sku, p.unit_price, s.name as supplier
+        FROM products p
+        JOIN suppliers s ON p.supplier_id = s.id
+        ORDER BY p.id DESC
+        LIMIT 5
+    """)
+    
+    result = db.session.execute(sql)
+    data = [{'name': row[0], 'sku': row[1], 'price': float(row[2]), 'supplier': row[3]} for row in result]
+    return jsonify(data), 200
