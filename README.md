@@ -1,5 +1,7 @@
 # Cloud-Based Inventory Management System
 
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/YOUR_USERNAME/inventory-system)
+
 A production-ready, 3-tier Inventory Management System built with Python (Flask), MySQL, and Bootstrap. Designed to demonstrate strict 3NF database design, raw SQL analytics, and secure JWT authentication.
 
 ## Resume Match
@@ -11,6 +13,16 @@ This project directly implements the following:
 - **Deployment**: Configured for Render with managed MySQL (`render.yaml`).
 
 ## Setup & Installation
+
+### 🚀 Quick Start (Browser)
+You can run this project directly in your browser without installing anything:
+1.  Click the **"Open in GitHub Codespaces"** badge above.
+2.  Wait for the environment to set up (it will automatically install dependencies and seed the database).
+3.  In the terminal, run:
+    ```bash
+    python run.py
+    ```
+4.  Click the "Open in Browser" popup.
 
 ### Local Development
 1. **Install dependencies**:
