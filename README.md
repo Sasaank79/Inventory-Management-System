@@ -44,30 +44,7 @@ You can run this project directly in your browser without installing anything:
    *   **Username**: `admin`
    *   **Password**: `admin`
 
-### Cloud Deployment (Optional)
-This project is configured for **Infrastructure as Code** deployment on Render. You can deploy it if you wish, or just run it locally.
 
-1.  **Push to GitHub**:
-    Create a new repository on GitHub and push this code:
-    ```bash
-    git remote add origin https://github.com/YOUR_USERNAME/inventory-system.git
-    git push -u origin main
-    ```
-
-2.  **Deploy on Render**:
-    *   Go to [dashboard.render.com](https://dashboard.render.com).
-    *   Click **New +** -> **Blueprint**.
-    *   Connect your GitHub repository.
-    *   Render will automatically detect `render.yaml` and create:
-        *   **Web Service**: The Flask App.
-        *   **Database**: A managed MySQL instance.
-    *   Click **Apply**.
-
-3.  **Seed the Live Database**:
-    Once deployed, the database will be empty. To seed it:
-    *   Go to the **Web Service** in Render Dashboard.
-    *   Click **Shell** (SSH).
-    *   Run: `python seed_db.py`
 
 ## API Endpoints
 - `POST /auth/login`: Get JWT token.
