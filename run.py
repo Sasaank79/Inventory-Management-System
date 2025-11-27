@@ -2,6 +2,10 @@ from app import create_app
 
 app = create_app()
 
+with app.app_context():
+    from app.models import db
+    db.create_all()
+
 # Add a root route to render the login page or dashboard
 from flask import render_template
 
