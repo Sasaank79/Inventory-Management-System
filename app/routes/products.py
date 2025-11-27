@@ -11,13 +11,16 @@ def get_products(current_user):
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 20, type=int)
     search = request.args.get('q', '', type=str)
+    sort_by = request.args.get('sort', 'id', type=str)
     
     query = Product.query
     if search:
         query = query.filter(Product.name.ilike(f'%{search}%') | Product.sku.ilike(f'%{search}%'))
     
-    # Default sort by name for better UX (especially for dropdowns)
-    query = query.order_by(Product.name.asc())
+    if sort_by == 'name':
+        query = query.order_by(Product.name.asc())
+    else:
+        query = query.order_by(Product.id.asc())
         
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     products = pagination.items

@@ -81,8 +81,7 @@
     }
 
     async function loadProducts() {
-        // Fetch a large number to populate dropdown (simple fix for now)
-        const res = await apiCall('/api/products?per_page=1000');
+        const res = await apiCall('/api/products?per_page=1000&sort=name');
         if (res.ok) {
             const data = await res.json();
             const select = document.getElementById('productSelect');
