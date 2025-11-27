@@ -19,3 +19,34 @@ class Config:
         'pool_recycle': 3600,
         'pool_pre_ping': True
     }
+
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+    FLASK_ENV = 'development'
+
+
+class ProductionConfig(Config):
+    DEBUG = False
+    FLASK_ENV = 'production'
+    SQLALCHEMY_ECHO = False
+
+
+class TestingConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    SQLALCHEMY_ENGINE_OPTIONS = {}
+
+
+config_map = {
+    'development': DevelopmentConfig,
+    'production': ProductionConfig,
+    'testing': TestingConfig,
+    'default': DevelopmentConfig
+}
+
+
+def get_config(env=None):
+    if env is None:
+        env = os.getenv('FLASK_ENV', 'development')
+    return config_map.get(env, DevelopmentConfig)
