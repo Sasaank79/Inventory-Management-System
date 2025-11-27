@@ -1,19 +1,21 @@
 import pytest
+import os
 from app import create_app, db
 from app.models import User, Product, Supplier, InventoryTransaction
 from werkzeug.security import generate_password_hash
-
-import os
-
 from sqlalchemy.pool import NullPool
 
 @pytest.fixture
 def app():
     app = create_app()
-    db_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'test.db')
+    
+    test_db_url = os.getenv('DATABASE_URL', 'sqlite:///:memory:')
+    if test_db_url.startswith('postgres://'):
+        test_db_url = test_db_url.replace('postgres://', 'postgresql://', 1)
+    
     app.config.update({
         "TESTING": True,
-        "SQLALCHEMY_DATABASE_URI": f"sqlite:///{db_path}",
+        "SQLALCHEMY_DATABASE_URI": test_db_url,
         "JWT_SECRET_KEY": "test-secret",
         "SQLALCHEMY_ENGINE_OPTIONS": {"poolclass": NullPool}
     })
@@ -21,7 +23,6 @@ def app():
     with app.app_context():
         db.create_all()
         
-        # Check if admin exists (in case of failed previous run)
         if not User.query.filter_by(username='admin').first():
             admin = User(username='admin', password_hash=generate_password_hash('password'))
             db.session.add(admin)
@@ -36,10 +37,6 @@ def app():
         
         db.session.remove()
         db.drop_all()
-        
-    # Clean up file
-    if os.path.exists(db_path):
-        os.remove(db_path)
 
 @pytest.fixture
 def client(app):
