@@ -3,8 +3,25 @@ from app import create_app
 app = create_app()
 
 with app.app_context():
-    from app.models import db
+    from app.models import db, User
+    from werkzeug.security import generate_password_hash
+    import os
+    
     db.create_all()
+    
+    # Auto-create admin user if none exists
+    if User.query.count() == 0:
+        admin_username = os.getenv('ADMIN_USERNAME', 'admin')
+        admin_password = os.getenv('ADMIN_PASSWORD', 'admin')
+        admin = User(
+            username=admin_username,
+            password_hash=generate_password_hash(admin_password)
+        )
+        db.session.add(admin)
+        db.session.commit()
+        print(f"✅ Created admin user: {admin_username}")
+    else:
+        print(f"✅ Database ready with {User.query.count()} users")
 
 # Add a root route to render the login page or dashboard
 from flask import render_template
