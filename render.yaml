@@ -1,6 +1,7 @@
 services:
   - type: web
     name: inventory-management
+    runtime: python
     env: python
     region: oregon
     plan: free
