@@ -25,6 +25,8 @@
                     <th>Supplier</th>
                     <th>Price</th>
                     <th>Stock</th>
+                    <th>Status</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody id="productsTable">
@@ -101,10 +103,10 @@
             const tbody = document.getElementById('productsTable');
 
             if (data.products.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center">No products found</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center">No products found</td></tr>';
             } else {
                 tbody.innerHTML = data.products.map(p => `
-                <tr>
+                <tr class="${p.is_active === false ? 'table-secondary' : ''}">
                     <td>${p.id}</td>
                     <td>${p.name}</td>
                     <td>${p.sku}</td>
@@ -112,6 +114,13 @@
                     <td>${p.supplier}</td>
                     <td>$${p.unit_price.toFixed(2)}</td>
                     <td>${p.stock}</td>
+                    <td>${p.is_active !== false ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Archived</span>'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-${p.is_active !== false ? 'warning' : 'success'}" 
+                                onclick="toggleProductActive(${p.id}, ${p.is_active !== false})">
+                            ${p.is_active !== false ? 'Archive' : 'Activate'}
+                        </button>
+                    </td>
                 </tr>
             `).join('');
             }
@@ -179,6 +188,18 @@
             alert('Error creating product');
         }
     });
+
+    async function toggleProductActive(id, isCurrentlyActive) {
+        const action = isCurrentlyActive ? 'archive' : 'activate';
+        if (!confirm(`Are you sure you want to ${action} this product?`)) return;
+
+        const res = await apiCall(`/api/products/${id}/toggle-active`, 'PATCH');
+        if (res.ok) {
+            loadProducts(currentPage, currentSearch);
+        } else {
+            alert(`Failed to ${action} product`);
+        }
+    }
 
     loadProducts();
     loadSuppliers();

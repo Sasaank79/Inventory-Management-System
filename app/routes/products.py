@@ -42,7 +42,8 @@ def get_products(current_user):
             'category': product.category,
             'supplier': product.supplier.name,
             'unit_price': float(product.unit_price),
-            'stock': current_stock
+            'stock': current_stock,
+            'is_active': product.is_active
         })
         
     return jsonify({
