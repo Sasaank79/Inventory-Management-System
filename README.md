@@ -66,11 +66,13 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
 cp .env.example .env
-# Edit .env with your DATABASE_URL and credentials
+# Edit .env and set your ADMIN_USERNAME and ADMIN_PASSWORD
 
 python seed_db.py
 python run.py
 ```
+
+Visit `http://localhost:5000` and login with the credentials you set in `.env`.
 
 ## Cloud Deployment
 
