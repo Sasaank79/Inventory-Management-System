@@ -125,6 +125,15 @@ def update_product(current_user, id):
     db.session.commit()
     return jsonify({'message': 'Product updated'}), 200
 
+@products_bp.route('/api/products/<int:id>/toggle-active', methods=['PATCH'])
+@token_required
+def toggle_product_active(current_user, id):
+    product = Product.query.get_or_404(id)
+    product.is_active = not product.is_active
+    db.session.commit()
+    status = 'activated' if product.is_active else 'archived'
+    return jsonify({'message': f'Product {status}', 'is_active': product.is_active}), 200
+
 @products_bp.route('/api/products/<int:id>', methods=['DELETE'])
 @token_required
 def delete_product(current_user, id):
@@ -132,3 +141,4 @@ def delete_product(current_user, id):
     db.session.delete(product)
     db.session.commit()
     return jsonify({'message': 'Product deleted'}), 200
+

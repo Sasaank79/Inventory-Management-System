@@ -27,6 +27,7 @@ class Product(db.Model):
     category = db.Column(db.String(50), nullable=False)
     supplier_id = db.Column(db.Integer, db.ForeignKey('suppliers.id'), nullable=False)
     unit_price = db.Column(db.Numeric(10, 2), nullable=False)
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     transactions = db.relationship('InventoryTransaction', backref='product', lazy=True)

@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS products (
     category VARCHAR(50) NOT NULL,
     supplier_id INTEGER NOT NULL,
     unit_price NUMERIC(10, 2) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE RESTRICT
 );
