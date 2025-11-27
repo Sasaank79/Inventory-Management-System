@@ -37,6 +37,14 @@ class InventoryTransaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
-    transaction_type = db.Column(db.Enum('IN', 'OUT'), nullable=False)
+    transaction_type = db.Column(db.String(3), nullable=False)
     transaction_date = db.Column(db.DateTime, default=datetime.utcnow)
     notes = db.Column(db.Text)
+    
+    __table_args__ = (
+        db.CheckConstraint("transaction_type IN ('IN', 'OUT')", name='check_transaction_type'),
+    )
+    
+    __table_args__ = (
+        db.CheckConstraint("transaction_type IN ('IN', 'OUT')", name='check_transaction_type'),
+    )
