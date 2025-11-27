@@ -15,6 +15,9 @@ def get_products(current_user):
     query = Product.query
     if search:
         query = query.filter(Product.name.ilike(f'%{search}%') | Product.sku.ilike(f'%{search}%'))
+    
+    # Default sort by name for better UX (especially for dropdowns)
+    query = query.order_by(Product.name.asc())
         
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     products = pagination.items
