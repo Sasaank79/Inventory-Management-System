@@ -1,6 +1,7 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from config import Config
+from config.logging import setup_logging
 
 db = SQLAlchemy()
 
@@ -8,9 +9,13 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
+    setup_logging(app)
     db.init_app(app)
 
-    # Register Blueprints
+    @app.route('/health')
+    def health():
+        return jsonify({'status': 'healthy'}), 200
+
     from app.routes.auth import auth_bp
     from app.routes.products import products_bp
     from app.routes.suppliers import suppliers_bp

@@ -1,9 +1,13 @@
-import csv
+import os
 import random
+import logging
 from faker import Faker
 from app import create_app, db
 from app.models import Supplier, Product, InventoryTransaction, User
 from werkzeug.security import generate_password_hash
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 fake = Faker()
 
@@ -19,7 +23,6 @@ def generate_seed_data(num_products=500):
     
     products = []
     categories = ['Electronics', 'Clothing', 'Home', 'Toys', 'Books', 'Tools']
-    
     seen_skus = set()
     
     for _ in range(num_products):
@@ -43,56 +46,68 @@ def generate_seed_data(num_products=500):
 def seed_database():
     app = create_app()
     with app.app_context():
-        print("Creating database tables...")
+        logger.info("Creating database tables")
         db.create_all()
         
         if User.query.first():
-            print("Database already seeded.")
+            logger.info("Database already seeded")
             return
 
-        print("Seeding Users...")
-        admin = User(username='admin', password_hash=generate_password_hash('admin'))
+        admin_username = os.getenv('ADMIN_USERNAME', 'admin')
+        admin_password = os.getenv('ADMIN_PASSWORD', 'SecurePass123!')
+        
+        logger.info(f"Creating admin user: {admin_username}")
+        admin = User(
+            username=admin_username,
+            password_hash=generate_password_hash(admin_password)
+        )
         db.session.add(admin)
-        
-        suppliers_data, products_data = generate_seed_data()
-        
-        print("Seeding Suppliers...")
-        supplier_map = {} # name -> id
-        for s_data in suppliers_data:
-            if s_data['name'] not in supplier_map:
-                supplier = Supplier(
-                    name=s_data['name'],
-                    contact_email=s_data['contact_email'],
-                    phone=s_data['phone'],
-                    address=s_data['address']
-                )
-                db.session.add(supplier)
-                db.session.flush() # get ID
-                supplier_map[s_data['name']] = supplier.id
-        
-        print("Seeding Products and Initial Transactions...")
-        for p_data in products_data:
-            product = Product(
-                name=p_data['name'],
-                sku=p_data['sku'],
-                category=p_data['category'],
-                supplier_id=supplier_map[p_data['supplier_name']],
-                unit_price=p_data['unit_price']
-            )
-            db.session.add(product)
-            db.session.flush()
-            
-            # Initial stock transaction
-            transaction = InventoryTransaction(
-                product_id=product.id,
-                quantity=p_data['initial_stock'],
-                transaction_type='IN',
-                notes='Initial stock seeding'
-            )
-            db.session.add(transaction)
-            
         db.session.commit()
-        print("Seeding complete!")
+        
+        is_dev = os.getenv('FLASK_ENV', 'production') == 'development'
+        
+        if is_dev:
+            logger.info("Development mode: seeding 500 products")
+            suppliers_data, products_data = generate_seed_data(500)
+            
+            logger.info("Seeding suppliers")
+            supplier_map = {}
+            for s_data in suppliers_data:
+                if s_data['name'] not in supplier_map:
+                    supplier = Supplier(
+                        name=s_data['name'],
+                        contact_email=s_data['contact_email'],
+                        phone=s_data['phone'],
+                        address=s_data['address']
+                    )
+                    db.session.add(supplier)
+                    db.session.flush()
+                    supplier_map[s_data['name']] = supplier.id
+            
+            logger.info("Seeding products and initial transactions")
+            for p_data in products_data:
+                product = Product(
+                    name=p_data['name'],
+                    sku=p_data['sku'],
+                    category=p_data['category'],
+                    supplier_id=supplier_map[p_data['supplier_name']],
+                    unit_price=p_data['unit_price']
+                )
+                db.session.add(product)
+                db.session.flush()
+                
+                transaction = InventoryTransaction(
+                    product_id=product.id,
+                    quantity=p_data['initial_stock'],
+                    transaction_type='IN',
+                    notes='Initial stock'
+                )
+                db.session.add(transaction)
+            
+            db.session.commit()
+            logger.info("Seeding complete")
+        else:
+            logger.info("Production mode: skipping product seeding")
 
 if __name__ == '__main__':
     seed_database()
