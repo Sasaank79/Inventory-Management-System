@@ -15,6 +15,23 @@ A production-ready inventory management system built with Flask and PostgreSQL, 
 
 > Hosted on Render free tier - first request may take 30-60 seconds (cold start)
 
+## 📸 Screenshots
+
+### Login
+![Login Page](docs/screenshots/login.png)
+
+### Dashboard
+![Dashboard](docs/screenshots/dashboard.png)
+
+### Products Management
+![Products](docs/screenshots/products.png)
+
+### Product Search
+![Product Search](docs/screenshots/products-search.png)
+
+### Analytics
+![Analytics Dashboard](docs/screenshots/analytics.png)
+
 ## ✨ Key Features
 
 - **Product Management** - CRUD operations with SKU tracking and archiving
@@ -99,4 +116,4 @@ MIT License - see [LICENSE](LICENSE) file
 
 ---
 
-**Built with** ❤️ **by** [Sasaank79](https://github.com/Sasaank79)
+**Built by [Sasaank79](https://github.com/Sasaank79)**
