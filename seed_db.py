@@ -53,18 +53,21 @@ def seed_database():
         if Supplier.query.count() > 0:
             logger.info("Database already seeded")
             return
-
-        # Create admin user
+        
+        # Create admin user if it doesn't exist
         admin_username = os.getenv('ADMIN_USERNAME', 'admin')
         admin_password = os.getenv('ADMIN_PASSWORD', 'admin')
         
-        admin = User(
-            username=admin_username,
-            password_hash=generate_password_hash(admin_password)
-        )
-        db.session.add(admin)
-        db.session.commit()
-        logger.info(f"Creating admin user: {admin_username}")
+        if not User.query.filter_by(username=admin_username).first():
+            admin = User(
+                username=admin_username,
+                password_hash=generate_password_hash(admin_password)
+            )
+            db.session.add(admin)
+            db.session.commit()
+            logger.info(f"Creating admin user: {admin_username}")
+        else:
+            logger.info(f"Admin user {admin_username} already exists")
         
         is_dev = os.getenv('FLASK_ENV', 'production') == 'development'
         
