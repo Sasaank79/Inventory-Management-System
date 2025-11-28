@@ -17,9 +17,10 @@ def generate_seed_data(num_products=500):
         suppliers.append({
             'name': fake.company(),
             'contact_email': fake.company_email(),
-            'phone': fake.phone_number(),
+            'phone': fake.phone_number()[:20],  # Truncate to fit VARCHAR(20)
             'address': fake.address()
         })
+
     
     products = []
     categories = ['Electronics', 'Clothing', 'Home', 'Toys', 'Books', 'Tools']
