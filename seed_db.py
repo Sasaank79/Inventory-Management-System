@@ -69,24 +69,9 @@ def seed_database():
         else:
             logger.info(f"Admin user {admin_username} already exists")
         
+        # Always seed suppliers and products.
+        # Use fewer products in production to keep it manageable.
         is_dev = os.getenv('FLASK_ENV', 'production') == 'development'
-        
-        if is_dev:
-            logger.info("Development mode: seeding 500 products")
-            suppliers_data, products_data = generate_seed_data(500)
-            
-            logger.info("Seeding suppliers")
-            supplier_map = {}
-            for s_data in suppliers_data:
-                if s_data['name'] not in supplier_map:
-                    supplier = Supplier(
-                        name=s_data['name'],
-                        contact_email=s_data['contact_email'],
-                        phone=s_data['phone'],
-                        address=s_data['address']
-                    )
-                    db.session.add(supplier)
-                    db.session.flush()
                     supplier_map[s_data['name']] = supplier.id
             
             logger.info("Seeding products and initial transactions")
