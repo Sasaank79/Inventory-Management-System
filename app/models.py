@@ -44,7 +44,3 @@ class InventoryTransaction(db.Model):
     __table_args__ = (
         db.CheckConstraint("transaction_type IN ('IN', 'OUT')", name='check_transaction_type'),
     )
-    
-    __table_args__ = (
-        db.CheckConstraint("transaction_type IN ('IN', 'OUT')", name='check_transaction_type'),
-    )
