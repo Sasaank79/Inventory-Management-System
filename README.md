@@ -1,31 +1,53 @@
 # Inventory Management System
 
-![Python](https://img.shields.io/badge/python-3.11-blue.svg)
-![Flask](https://img.shields.io/badge/flask-3.0.0-green.svg)
-![PostgreSQL](https://img.shields.io/badge/postgresql-15-blue.svg)
-![Build](https://github.com/Sasaank79/Inventory-Management-System/workflows/CI/badge.svg)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+[![Python](https://img.shields.io/badge/Python-3.11.9-blue.svg)](https://www.python.org/downloads/)
+[![Flask](https://img.shields.io/badge/Flask-3.0.0-green.svg)](https://flask.palletsprojects.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue.svg)](https://www.postgresql.org/)
+[![Deployment](https://img.shields.io/badge/Deployment-Render-brightgreen.svg)](https://render.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-A production-ready inventory management system built with Flask and PostgreSQL, featuring JWT authentication, RESTful APIs, and real-time analytics.
+A production-ready inventory management system built with Flask and PostgreSQL, featuring advanced analytics, real-time stock tracking, and automated database seeding.
 
-## Features
+## 🌐 Live Demo
+
+**https://inventory-management-ylmu.onrender.com**
+
+> **Note:** Hosted on Render free tier - the app auto-sleeps after 15 minutes of inactivity and takes ~30-60 seconds to wake up on first request.
+
+## 📋 Features
 
 - **Authentication**: Secure JWT-based authentication with password hashing
-- **Product Management**: Full CRUD operations with SKU tracking and categorization
-- **Supplier Management**: Maintain supplier relationships and contact information
-- **Inventory Tracking**: Transaction-based stock management (IN/OUT)
-- **Analytics**: Real-time insights including top-selling products, low stock alerts, and inventory valuation
+### Core Functionality
+- **Product Management** - Create, read, update products with SKU tracking
+- **Product Archiving** - Archive/activate products with visual status indicators
+- **Supplier Management** - Track supplier information and relationships
+- **Stock Transactions** - Record stock IN (purchases) and OUT (sales) with notes
+- **Real-time Stock Tracking** - Automatic stock calculation from transaction history
+
+### Advanced Analytics
+- **Low Stock Alerts** - Identify products below threshold (<20 units)
+- **Top Selling Products** - Most frequently sold items
+- **Recent Products** - Latest additions to inventory
+- **Stock Value by Category** - Product count, total units, and value per category
+- **Products by Supplier** - Product count and total stock per supplier
+- **Stock Movement History** - Detailed IN/OUT transaction timeline per product with running totals
+
+### Security & Authentication
+- **JWT-based Authentication** - Secure API endpoints
+- **Password Hashing** - Werkzeug security for credential storage
+- **Environment-based Configuration** - Secrets managed via environment variables
+
+### Technical Features
 - **RESTful API**: Clean API design with proper HTTP status codes and JSON responses
-- **Pagination & Search**: Efficient data browsing with server-side pagination
-- **Docker Support**: Complete containerization for local development and production
-- **CI/CD**: Automated testing and linting via GitHub Actions
+- **Automated Database Seeding** - Auto-generates 100 products and 20 suppliers on first deployment
+- **PostgreSQL Compatibility** - Production-ready with proper constraints and indexing
+- **Health Check Endpoint** - `/health` for monitoring uptime
+- **Centralized Logging** - Structured logging across all components
+- **CI/CD Ready** - GitHub Actions workflow for testing and linting
 
 ## Architecture
 
-![Architecture Diagram](docs/architecture.png)
-
-The system follows a three-tier architecture:
-- **Frontend**: Browser-based interface
+**MVC Pattern** with clear separation of concerns:
 - **Backend**: Flask application with modular route blueprints (Auth, Products, Suppliers, Transactions, Analytics)
 - **Database**: PostgreSQL with strict 3NF schema design
 
