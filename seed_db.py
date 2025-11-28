@@ -46,23 +46,25 @@ def generate_seed_data(num_products=500):
 def seed_database():
     app = create_app()
     with app.app_context():
-        logger.info("Creating database tables")
         db.create_all()
+        logger.info("Creating database tables")
         
-        if User.query.first():
+        # Check if database is already seeded by checking suppliers (not users)
+        if Supplier.query.count() > 0:
             logger.info("Database already seeded")
             return
 
+        # Create admin user
         admin_username = os.getenv('ADMIN_USERNAME', 'admin')
-        admin_password = os.getenv('ADMIN_PASSWORD', 'SecurePass123!')
+        admin_password = os.getenv('ADMIN_PASSWORD', 'admin')
         
-        logger.info(f"Creating admin user: {admin_username}")
         admin = User(
             username=admin_username,
             password_hash=generate_password_hash(admin_password)
         )
         db.session.add(admin)
         db.session.commit()
+        logger.info(f"Creating admin user: {admin_username}")
         
         is_dev = os.getenv('FLASK_ENV', 'production') == 'development'
         
