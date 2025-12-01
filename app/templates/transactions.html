@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mt-4 mb-3">Transactions</h2>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">New Transaction</div>
+            <div class="card-body">
+                <form id="transactionForm">
+                    <div class="mb-3">
+                        <label class="form-label">Product</label>
+                        <select class="form-select" name="product_id" id="productSelect" required>
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Type</label>
+                            <select class="form-select" name="transaction_type" required>
+                                <option value="IN">IN (Add Stock)</option>
+                                <option value="OUT">OUT (Remove Stock)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Quantity</label>
+                            <input type="number" class="form-control" name="quantity" min="1" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <input type="text" class="form-control" name="notes">
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Record Transaction</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">Recent Transactions</div>
+    <div class="card-body">
+        <table class="table table-sm">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Date</th>
+                    <th>Product</th>
+                    <th>Type</th>
+                    <th>Qty</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody id="transactionsTable">
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function loadTransactions() {
+        const res = await apiCall('/api/transactions');
+        if (res.ok) {
+            const transactions = await res.json();
+            const tbody = document.getElementById('transactionsTable');
+            tbody.innerHTML = transactions.map(t => `
+            <tr>
+                <td>${t.id}</td>
+                <td>${new Date(t.date).toLocaleString()}</td>
+                <td>${t.product_name}</td>
+                <td><span class="badge bg-${t.type === 'IN' ? 'success' : 'danger'}">${t.type}</span></td>
+                <td>${t.quantity}</td>
+                <td>${t.notes || ''}</td>
+            </tr>
+        `).join('');
+        }
+    }
+
+    async function loadProducts() {
+        const res = await apiCall('/api/products?per_page=1000&sort=name');
+        if (res.ok) {
+            const data = await res.json();
+            const select = document.getElementById('productSelect');
+            select.innerHTML = data.products.map(p => `<option value="${p.id}">${p.name} (Stock: ${p.stock})</option>`).join('');
+        }
+    }
+
+    document.getElementById('transactionForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+
+        const res = await apiCall('/api/transactions', 'POST', data);
+        if (res.ok) {
+            e.target.reset();
+            loadTransactions();
+            loadProducts(); // Refresh stock counts in dropdown
+        } else {
+            const err = await res.json();
+            alert(err.message);
+        }
+    });
+
+    loadTransactions();
+    loadProducts();
+</script>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mt-4">Dashboard</h2>
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-header">Total Products</div>
+            <div class="card-body">
+                <h1 class="card-title" id="totalProducts">-</h1>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-header">Low Stock Items</div>
+            <div class="card-body">
+                <h1 class="card-title" id="lowStockCount">-</h1>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">Total Stock Value</div>
+            <div class="card-body">
+                <h1 class="card-title" id="stockValue">-</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">Quick Actions</div>
+            <div class="card-body">
+                <a href="/products-page" class="btn btn-outline-primary w-100 mb-2">Manage Products</a>
+                <a href="/transactions-page" class="btn btn-outline-success w-100 mb-2">New Transaction</a>
+                <a href="/analytics-page" class="btn btn-outline-info w-100">View Analytics</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    async function loadStats() {
+        // Parallel fetch for dashboard stats
+        const [productsRes, lowStockRes, valueRes] = await Promise.all([
+            apiCall('/api/products'),
+            apiCall('/api/analytics/low-stock'),
+            apiCall('/api/analytics/stock-value')
+        ]);
+
+        if (productsRes && productsRes.ok) {
+            const data = await productsRes.json();
+            // API now returns { products: [], total: ... }
+            document.getElementById('totalProducts').textContent = data.total;
+        }
+
+        if (lowStockRes && lowStockRes.ok) {
+            const lowStock = await lowStockRes.json();
+            document.getElementById('lowStockCount').textContent = lowStock.length;
+        }
+
+        if (valueRes && valueRes.ok) {
+            const value = await valueRes.json();
+            document.getElementById('stockValue').textContent = '$' + value.total_stock_value.toFixed(2);
+        }
+    }
+
+    loadStats();
+</script>
+{% endblock %}
