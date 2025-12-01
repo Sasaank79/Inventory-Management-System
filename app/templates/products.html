@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+    <h2>Products</h2>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProductModal">Add Product</button>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-6">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search by Name or SKU...">
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>SKU</th>
+                    <th>Category</th>
+                    <th>Supplier</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="productsTable">
+                <!-- Populated by JS -->
+            </tbody>
+        </table>
+
+        <nav>
+            <ul class="pagination justify-content-center" id="paginationControls">
+                <!-- Populated by JS -->
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Product</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addProductForm">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">SKU</label>
+                        <input type="text" class="form-control" name="sku" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Category</label>
+                        <input type="text" class="form-control" name="category" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Supplier</label>
+                        <select class="form-select" name="supplier_id" id="supplierSelect" required>
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Unit Price</label>
+                        <input type="number" step="0.01" class="form-control" name="unit_price" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Initial Stock</label>
+                        <input type="number" class="form-control" name="initial_stock" value="0">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Product</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentPage = 1;
+    let currentSearch = '';
+
+    async function loadProducts(page = 1, search = '') {
+        currentPage = page;
+        currentSearch = search;
+
+        const url = `/api/products?page=${page}&q=${encodeURIComponent(search)}`;
+        const res = await apiCall(url);
+
+        if (res.ok) {
+            const data = await res.json();
+            const tbody = document.getElementById('productsTable');
+
+            if (data.products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="text-center">No products found</td></tr>';
+            } else {
+                tbody.innerHTML = data.products.map(p => `
+                <tr class="${p.is_active === false ? 'table-secondary' : ''}">
+                    <td>${p.id}</td>
+                    <td>${p.name}</td>
+                    <td>${p.sku}</td>
+                    <td>${p.category}</td>
+                    <td>${p.supplier}</td>
+                    <td>$${p.unit_price.toFixed(2)}</td>
+                    <td>${p.stock}</td>
+                    <td>${p.is_active !== false ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Archived</span>'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-${p.is_active !== false ? 'warning' : 'success'}" 
+                                onclick="toggleProductActive(${p.id}, ${p.is_active !== false})">
+                            ${p.is_active !== false ? 'Archive' : 'Activate'}
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            }
+
+            renderPagination(data.current_page, data.pages);
+        }
+    }
+
+    function renderPagination(current, total) {
+        const nav = document.getElementById('paginationControls');
+        let html = '';
+
+        // Previous
+        html += `<li class="page-item ${current === 1 ? 'disabled' : ''}">
+        <a class="page-link" href="#" onclick="loadProducts(${current - 1}, '${currentSearch}')">Previous</a>
+    </li>`;
+
+        // Simple range: current-2 to current+2
+        let start = Math.max(1, current - 2);
+        let end = Math.min(total, current + 2);
+
+        for (let i = start; i <= end; i++) {
+            html += `<li class="page-item ${i === current ? 'active' : ''}">
+            <a class="page-link" href="#" onclick="loadProducts(${i}, '${currentSearch}')">${i}</a>
+        </li>`;
+        }
+
+        // Next
+        html += `<li class="page-item ${current === total ? 'disabled' : ''}">
+        <a class="page-link" href="#" onclick="loadProducts(${current + 1}, '${currentSearch}')">Next</a>
+    </li>`;
+
+        nav.innerHTML = html;
+    }
+
+    // Search Debounce
+    let timeout = null;
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+            loadProducts(1, e.target.value);
+        }, 300);
+    });
+
+    async function loadSuppliers() {
+        const res = await apiCall('/api/suppliers');
+        if (res.ok) {
+            const suppliers = await res.json();
+            const select = document.getElementById('supplierSelect');
+            select.innerHTML = suppliers.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+        }
+    }
+
+    document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+
+        const res = await apiCall('/api/products', 'POST', data);
+        if (res.ok) {
+            bootstrap.Modal.getInstance(document.getElementById('addProductModal')).hide();
+            e.target.reset();
+            loadProducts(currentPage, currentSearch);
+        } else {
+            alert('Error creating product');
+        }
+    });
+
+    async function toggleProductActive(id, isCurrentlyActive) {
+        const action = isCurrentlyActive ? 'archive' : 'activate';
+        if (!confirm(`Are you sure you want to ${action} this product?`)) return;
+
+        const res = await apiCall(`/api/products/${id}/toggle-active`, 'PATCH');
+        if (res.ok) {
+            loadProducts(currentPage, currentSearch);
+        } else {
+            alert(`Failed to ${action} product`);
+        }
+    }
+
+    loadProducts();
+    loadSuppliers();
+</script>
+{% endblock %}

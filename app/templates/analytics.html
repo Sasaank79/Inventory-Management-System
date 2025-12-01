@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2 class="mt-4 mb-3">Analytics Dashboard</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">Top Selling Products</div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Total Sold</th>
+                        </tr>
+                    </thead>
+                    <tbody id="topSellingTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">Recently Added Products</div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>SKU</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentProductsTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">Stock Value by Category</div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Products</th>
+                            <th>Units</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categoryTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">Products by Supplier</div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Supplier</th>
+                            <th>Products</th>
+                            <th>Total Stock</th>
+                        </tr>
+                    </thead>
+                    <tbody id="supplierTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-header">Low Stock Alert (< 20)</div>
+                    <div class="card-body">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>SKU</th>
+                                    <th>Current Stock</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lowStockTable"></tbody>
+                        </table>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header">Stock Movement History</div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Select Product</label>
+                        <select class="form-select" id="productSelect">
+                            <option value="">Choose a product...</option>
+                        </select>
+                    </div>
+                    <div id="movementTableContainer" style="display:none;">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Quantity</th>
+                                    <th>Running Stock</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="movementTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+
+    {% block scripts %}
+    <script>
+    async function loadAnalytics() {
+        const topRes = await apiCall('/api/analytics/top-selling');
+        if (topRes.ok) {
+            const data = await topRes.json();
+            document.getElementById('topSellingTable').innerHTML = data.map(i => `
+                <tr><td>${i.name}</td><td>${i.total_sold}</td></tr>
+            `).join('');
+        }
+
+        const lowRes = await apiCall('/api/analytics/low-stock');
+        if (lowRes.ok) {
+            const data = await lowRes.json();
+            document.getElementById('lowStockTable').innerHTML = data.map(i => `
+                <tr><td>${i.name}</td><td>${i.sku}</td><td class="text-danger fw-bold">${i.stock}</td></tr>
+            `).join('');
+        }
+
+        const recentRes = await apiCall('/api/analytics/recent-products');
+        if (recentRes.ok) {
+            const data = await recentRes.json();
+            document.getElementById('recentProductsTable').innerHTML = data.map(i => `
+                <tr><td>${i.name}</td><td>${i.sku}</td><td>$${i.price.toFixed(2)}</td></tr>
+            `).join('');
+        }
+
+        const catRes = await apiCall('/api/analytics/stock-by-category');
+        if (catRes.ok) {
+            const data = await catRes.json();
+            document.getElementById('categoryTable').innerHTML = data.map(i => `
+                <tr>
+                    <td>${i.category}</td>
+                    <td>${i.product_count}</td>
+                    <td>${i.total_units}</td>
+                    <td class="fw-bold">$${i.total_value.toFixed(2)}</td>
+                </tr>
+            `).join('');
+        }
+
+        const supRes = await apiCall('/api/analytics/products-by-supplier');
+        if (supRes.ok) {
+            const data = await supRes.json();
+            document.getElementById('supplierTable').innerHTML = data.map(i => `
+                <tr><td>${i.supplier}</td><td>${i.product_count}</td><td>${i.total_stock}</td></tr>
+            `).join('');
+        }
+
+        const prodRes = await apiCall('/api/products?per_page=1000&sort=name');
+        if (prodRes.ok) {
+            const data = await prodRes.json();
+            const select = document.getElementById('productSelect');
+            select.innerHTML = '<option value="">Choose a product...</option>' + 
+                data.products.map(p => `<option value="${p.id}">${p.name} (${p.sku})</option>`).join('');
+        }
+    }
+
+    document.getElementById('productSelect').addEventListener('change', async (e) => {
+        const productId = e.target.value;
+        if (!productId) {
+            document.getElementById('movementTableContainer').style.display = 'none';
+            return;
+        }
+
+        const res = await apiCall(`/api/analytics/stock-movement/${productId}`);
+        if (res.ok) {
+            const data = await res.json();
+            document.getElementById('movementTableContainer').style.display = 'block';
+            document.getElementById('movementTable').innerHTML = data.map(m => `
+                <tr>
+                    <td>${new Date(m.date).toLocaleString()}</td>
+                    <td><span class="badge bg-${m.type === 'IN' ? 'success' : 'danger'}">${m.type}</span></td>
+                    <td>${m.quantity}</td>
+                    <td class="fw-bold">${m.running_stock}</td>
+                    <td>${m.notes || ''}</td>
+                </tr>
+            `).join('');
+        }
+    });
+
+    loadAnalytics();
+    </script>
+    {% endblock %}
