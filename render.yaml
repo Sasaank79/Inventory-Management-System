@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: inventory-management
+    runtime: python
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt && python seed_db.py
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 4 run:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: inventory-db
+          property: connectionString
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+    healthCheckPath: /
+
+databases:
+  - name: inventory-db
+    databaseName: inventory_db
+    user: inventory_user
+    plan: free
