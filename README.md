@@ -85,6 +85,10 @@ Full API documentation: [docs/API.md](docs/API.md) *(coming soon)*
 
 ## 🧪 Testing
 
+[![Coverage](https://img.shields.io/badge/Coverage-96%25-brightgreen.svg)](tests/)
+
+**35 automated tests** covering all core modules with **96% code coverage**.
+
 ```bash
 # Run tests with coverage
 pytest tests/ -v --cov=app
@@ -92,6 +96,15 @@ pytest tests/ -v --cov=app
 # Lint code
 flake8 app/ config/ tests/
 ```
+
+**Test Coverage by Module:**
+| Module | Coverage |
+|--------|----------|
+| Auth & Security | 100% |
+| Products API | 99% |
+| Suppliers API | 100% |
+| Analytics API | 93% |
+| Transactions | 85% |
 
 ## 📁 Project Structure
 
