@@ -262,12 +262,12 @@ def test_toggle_product_active(client, auth_headers):
     # Toggle to inactive
     res = client.patch(f'/api/products/{product_id}/toggle-active', headers=auth_headers)
     assert res.status_code == 200
-    assert res.json['is_active'] == False
+    assert res.json['is_active'] is False
     
     # Toggle back to active
     res = client.patch(f'/api/products/{product_id}/toggle-active', headers=auth_headers)
     assert res.status_code == 200
-    assert res.json['is_active'] == True
+    assert res.json['is_active'] is True
 
 def test_delete_product(client, auth_headers):
     create_res = client.post('/api/products', json={
@@ -393,7 +393,7 @@ def test_transaction_flow(client, auth_headers):
 
 def test_get_transactions(client, auth_headers):
     # Create product with transactions
-    create_res = client.post('/api/products', json={
+    client.post('/api/products', json={
         'name': 'Trans List Product',
         'sku': 'TRANS-LIST-001',
         'category': 'Test',
