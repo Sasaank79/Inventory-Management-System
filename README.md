@@ -15,6 +15,8 @@ A production-ready inventory management system built with Flask and PostgreSQL, 
 
 > Hosted on Render free tier - first request may take 30-60 seconds (cold start)
 
+**🔑 Demo Credentials:** `admin` / `PasswordforAdmin`
+
 ## 📸 Screenshots
 
 ### Login
